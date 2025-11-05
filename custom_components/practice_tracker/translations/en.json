@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Practice Tracker",
+        "description": "Configure your practice/usage tracker",
+        "data": {
+          "tracker_name": "Tracker Name",
+          "num_players": "Number of Players"
+        }
+      },
+      "players": {
+        "title": "Configure Players",
+        "description": "Enter names for {num_players} players",
+        "data_description": {
+          "player_0": "Player 1 name",
+          "player_1": "Player 2 name",
+          "player_2": "Player 3 name",
+          "player_3": "Player 4 name",
+          "player_4": "Player 5 name",
+          "player_5": "Player 6 name",
+          "player_6": "Player 7 name",
+          "player_7": "Player 8 name"
+        }
+      },
+      "trigger": {
+        "title": "Configure Trigger",
+        "description": "Select the binary sensor that indicates when your activity is active",
+        "data": {
+          "trigger_entity": "Trigger Sensor"
+        }
+      }
+    },
+    "error": {
+      "duplicate_names": "Player names must be unique"
+    },
+    "abort": {
+      "already_configured": "A tracker with this name is already configured"
+    }
+  }
+}

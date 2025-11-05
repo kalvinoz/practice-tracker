@@ -1,0 +1,12 @@
+{
+  "domain": "practice_tracker",
+  "name": "Practice Tracker",
+  "codeowners": ["@pedroqueiroz"],
+  "config_flow": true,
+  "documentation": "https://github.com/pedroqueiroz/practice-tracker",
+  "integration_type": "device",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/pedroqueiroz/practice-tracker/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
