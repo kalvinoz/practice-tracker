@@ -13,7 +13,6 @@ from .const import (
     CONF_TRACKER_NAME,
     DOMAIN,
     OPTION_NONE,
-    OPTION_OTHER,
 )
 
 _LOGGER = logging.getLogger(__name__)
