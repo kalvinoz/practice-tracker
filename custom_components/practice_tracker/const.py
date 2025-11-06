@@ -19,4 +19,11 @@ PLATFORMS = ["select", "sensor"]
 
 # Player options
 OPTION_NONE = "None"
-OPTION_OTHER = "Other"
+
+# History tracking periods
+PERIOD_TODAY = "today"
+PERIOD_YESTERDAY = "yesterday"
+PERIOD_7_DAYS = "7_days"
+PERIOD_28_DAYS = "28_days"
+
+DEFAULT_PERIODS = [PERIOD_TODAY, PERIOD_YESTERDAY, PERIOD_7_DAYS, PERIOD_28_DAYS]
