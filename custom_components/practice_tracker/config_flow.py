@@ -81,7 +81,7 @@ class PracticeTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             num_players = self.config_data[CONF_NUM_PLAYERS]
 
             for i in range(num_players):
-                name = user_input.get(f"player_{i}")
+                name = user_input.get(f"player_{i+1}")
                 if name:
                     player_names.append(name.strip())
 
@@ -97,7 +97,7 @@ class PracticeTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema_dict = {}
 
         for i in range(num_players):
-            schema_dict[vol.Required(f"player_{i}", default=f"Player {i+1}")] = str
+            schema_dict[vol.Required(f"player_{i+1}", default=f"Player {i+1}")] = str
 
         return self.async_show_form(
             step_id="players",
