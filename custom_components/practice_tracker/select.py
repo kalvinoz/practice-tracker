@@ -35,7 +35,6 @@ async def async_setup_entry(
 class PracticeTrackerPlayerSelect(SelectEntity):
     """Representation of a Practice Tracker player selection."""
 
-    _attr_has_entity_name = True
     _attr_icon = "mdi:account-music"
 
     def __init__(
@@ -49,13 +48,15 @@ class PracticeTrackerPlayerSelect(SelectEntity):
         self._tracker_name = tracker_name
         self._player_names = player_names
 
-        # Build options: None + players + Other
-        self._attr_options = [OPTION_NONE] + player_names + [OPTION_OTHER]
+        # Build options: None + players (Other excluded for now)
+        self._attr_options = [OPTION_NONE] + player_names
         self._attr_current_option = OPTION_NONE
 
-        # Entity naming
-        self._attr_name = "Current Player"
+        # Entity naming: tracker_name + "Current Player"
+        tracker_slug = tracker_name.lower().replace(" ", "_")
+        self._attr_name = f"{tracker_name} Current Player"
         self._attr_unique_id = f"{DOMAIN}_{entry_id}_current_player"
+        self.entity_id = f"select.{tracker_slug}_current_player"
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
