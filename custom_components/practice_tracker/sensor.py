@@ -58,11 +58,23 @@ async def async_setup_entry(
                 )
             )
 
+    # Create total sensors for each period (sum of all players)
+    for period in DEFAULT_PERIODS:
+        sensors.append(
+            PracticeTotalSensor(
+                entry.entry_id,
+                tracker_name,
+                tracker_slug,
+                player_names,
+                period,
+            )
+        )
+
     _LOGGER.info(
-        "Created %d history sensors for %s (%d players × %d periods)",
+        "Created %d sensors for %s (%d history + %d totals)",
         len(sensors),
         tracker_name,
-        len(player_names),
+        len(player_names) * len(DEFAULT_PERIODS),
         len(DEFAULT_PERIODS),
     )
 
@@ -225,4 +237,95 @@ class PracticeHistorySensor(SensorEntity):
         """Update the sensor."""
         # The native_value property calculates on-demand
         # This is called periodically by HA
+        pass
+
+
+class PracticeTotalSensor(SensorEntity):
+    """Representation of a Practice Tracker total sensor (sum of all players)."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_state_class = SensorStateClass.TOTAL
+    _attr_native_unit_of_measurement = "h"
+    _attr_icon = "mdi:sigma"
+
+    def __init__(
+        self,
+        entry_id: str,
+        tracker_name: str,
+        tracker_slug: str,
+        player_names: list[str],
+        period: str,
+    ) -> None:
+        """Initialize the sensor."""
+        self._entry_id = entry_id
+        self._tracker_name = tracker_name
+        self._tracker_slug = tracker_slug
+        self._player_names = player_names
+        self._period = period
+
+        # Generate entity naming
+        self._attr_name = f"{tracker_name} Total {self._period_display_name()}"
+        self._attr_unique_id = f"{DOMAIN}_{entry_id}_total_{period}"
+        self.entity_id = f"sensor.{tracker_slug}_total_{period}"
+
+        # State attributes
+        self._attr_extra_state_attributes = {
+            "period": period,
+            "player_count": len(player_names),
+        }
+
+    def _period_display_name(self) -> str:
+        """Return human-readable period name."""
+        return {
+            PERIOD_TODAY: "Today",
+            PERIOD_YESTERDAY: "Yesterday",
+            PERIOD_7_DAYS: "7 Days",
+            PERIOD_28_DAYS: "28 Days",
+        }.get(self._period, self._period)
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the state of the sensor (sum of all player sensors)."""
+        if not self.hass:
+            return None
+
+        total = 0.0
+
+        # Sum all player sensors for this period
+        for player_name in self._player_names:
+            player_slug = player_name.lower().replace(" ", "_")
+            sensor_id = f"sensor.{self._tracker_slug}_{player_slug}_{self._period}"
+
+            state = self.hass.states.get(sensor_id)
+            if state and state.state not in ["unavailable", "unknown", "none"]:
+                try:
+                    total += float(state.state)
+                except (ValueError, TypeError):
+                    _LOGGER.warning(
+                        "Invalid state for %s: %s", sensor_id, state.state
+                    )
+
+        # Round to 2 decimal places
+        return round(total, 2)
+
+    @property
+    def available(self) -> bool:
+        """Return if sensor is available."""
+        if not self.hass:
+            return False
+
+        # Check if at least one player sensor is available
+        for player_name in self._player_names:
+            player_slug = player_name.lower().replace(" ", "_")
+            sensor_id = f"sensor.{self._tracker_slug}_{player_slug}_{self._period}"
+
+            state = self.hass.states.get(sensor_id)
+            if state and state.state not in ["unavailable", "unknown"]:
+                return True
+
+        return False
+
+    async def async_update(self) -> None:
+        """Update the sensor."""
+        # The native_value property calculates on-demand
         pass
