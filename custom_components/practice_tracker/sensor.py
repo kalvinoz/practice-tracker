@@ -105,6 +105,7 @@ class PracticeHistorySensor(SensorEntity):
         self._player_name = player_name
         self._period = period
         self._select_entity_id = select_entity_id
+        self._state: float | None = None
 
         # Generate entity naming
         player_slug = player_name.lower().replace(" ", "_")
@@ -158,26 +159,12 @@ class PracticeHistorySensor(SensorEntity):
 
         return start, end
 
-    @property
-    def native_value(self) -> float | None:
-        """Return the state of the sensor."""
+    def _calculate_history(self, start: datetime, end: datetime) -> float:
+        """Calculate practice time from history (runs in executor)."""
         if not self.hass:
-            return None
+            return 0.0
 
-        # Check if the select entity exists
-        select_state = self.hass.states.get(self._select_entity_id)
-        if not select_state:
-            _LOGGER.warning(
-                "Select entity %s not found for sensor %s",
-                self._select_entity_id,
-                self.entity_id,
-            )
-            return None
-
-        # Get period boundaries
-        start, end = self._get_period_start_end()
-
-        # Query history for the select entity
+        # Query history for the select entity (this is the blocking call)
         history_list = history.state_changes_during_period(
             self.hass,
             start,
@@ -224,6 +211,11 @@ class PracticeHistorySensor(SensorEntity):
         return hours
 
     @property
+    def native_value(self) -> float | None:
+        """Return the state of the sensor."""
+        return self._state
+
+    @property
     def available(self) -> bool:
         """Return if sensor is available."""
         # Check if source select entity exists
@@ -235,9 +227,28 @@ class PracticeHistorySensor(SensorEntity):
 
     async def async_update(self) -> None:
         """Update the sensor."""
-        # The native_value property calculates on-demand
-        # This is called periodically by HA
-        pass
+        if not self.hass:
+            self._state = None
+            return
+
+        # Check if the select entity exists
+        select_state = self.hass.states.get(self._select_entity_id)
+        if not select_state:
+            _LOGGER.warning(
+                "Select entity %s not found for sensor %s",
+                self._select_entity_id,
+                self.entity_id,
+            )
+            self._state = None
+            return
+
+        # Get period boundaries
+        start, end = self._get_period_start_end()
+
+        # Run the blocking history query in an executor
+        self._state = await self.hass.async_add_executor_job(
+            self._calculate_history, start, end
+        )
 
 
 class PracticeTotalSensor(SensorEntity):
