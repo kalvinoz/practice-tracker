@@ -327,7 +327,7 @@ After restructure, a user would:
 
 1. **Clone or download the repo**
    ```bash
-   git clone https://github.com/kalvinoz/practice-tracker
+   git clone https://github.com/pqzdev/practice-tracker
    ```
 
 2. **Install HA integration**

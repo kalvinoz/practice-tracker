@@ -1,12 +1,12 @@
 {
   "domain": "practice_tracker",
   "name": "Practice Tracker",
-  "codeowners": ["@kalvinoz"],
+  "codeowners": ["@pqzdev"],
   "config_flow": true,
-  "documentation": "https://github.com/kalvinoz/practice-tracker",
+  "documentation": "https://github.com/pqzdev/practice-tracker",
   "integration_type": "device",
   "iot_class": "calculated",
-  "issue_tracker": "https://github.com/kalvinoz/practice-tracker/issues",
+  "issue_tracker": "https://github.com/pqzdev/practice-tracker/issues",
   "requirements": [],
   "version": "0.2.0"
 }
